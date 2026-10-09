@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🎮 Тренажёр: Идея для проекта</title>
+<style>
+  :root{
+    --green:#2ecc71;
+    --green-dark:#27ae60;
+    --green-soft:#f0fff4;
+    --red:#e74c3c;
+    --blue:#3498db;
+    --purple:#9b59b6;
+    --gold:#f39c12;
+    --text:#2c3e50;
+    --muted:#7f8c8d;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+    background:linear-gradient(160deg,#a8e6cf 0%,#dcedc1 50%,#ffd3b6 100%);
+    background-attachment:fixed;
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    padding:12px;
+    font-size:18px;
+    line-height:1.4;
+    overflow-x:hidden;
+  }
+  .app{
+    width:100%;
+    max-width:500px;
+    background:#fff;
+    border-radius:24px;
+    box-shadow:0 15px 50px rgba(0,0,0,.18);
+    padding:22px 18px;
+    margin:auto 0;
+    position:relative;
+    overflow:hidden;
+  }
+  .screen{display:none;animation:fade .35s ease}
+  .screen.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  /* ===== START ===== */
+  .hero{text-align:center;padding:6px 0 18px}
+  .hero-emoji{font-size:64px;line-height:1;margin-bottom:8px;animation:pop 2s infinite}
+  @keyframes pop{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+  .hero h1{font-size:clamp(22px,6.5vw,28px);font-weight:800;margin-bottom:6px}
+  .subtitle{
+    font-size:16px;color:var(--muted);font-weight:600;
+    background:#f6f8fa;display:inline-block;
+    padding:6px 14px;border-radius:20px;margin-top:6px;
+  }
+  .field-label{
+    display:block;font-size:19px;font-weight:700;
+    margin:22px 0 10px;color:var(--text);
+  }
+  .name-input{
+    width:100%;padding:18px 20px;font-size:20px;font-weight:600;
+    border:3px solid var(--green);background-color:var(--green-soft);
+    border-radius:16px;box-shadow:0 0 0 4px rgba(46,204,113,.15);
+    outline:none;transition:.25s;color:var(--text);
+  }
+  .name-input:focus{
+    box-shadow:0 0 0 6px rgba(46,204,113,.28),0 0 24px rgba(46,204,113,.35);
+    transform:scale(1.01);
+  }
+  .btn{
+    width:100%;min-height:60px;border:none;border-radius:16px;
+    font-size:20px;font-weight:800;cursor:pointer;transition:.2s;
+    margin-top:16px;color:#fff;font-family:inherit;
+    background:linear-gradient(135deg,var(--green),var(--green-dark));
+    box-shadow:0 6px 18px rgba(46,204,113,.45);
+    letter-spacing:.3px;
+  }
+  .btn:active{transform:scale(.97)}
+  .btn:disabled{background:#d1d5db;box-shadow:none;cursor:not-allowed;color:#9ca3af}
+  .hint-text{text-align:center;color:var(--muted);font-size:15px;margin-top:16px;font-weight:600}
+
+  /* ===== GAME ===== */
+  .topbar{
+    display:flex;justify-content:space-between;align-items:center;
+    gap:6px;margin-bottom:12px;
+  }
+  .pill{
+    background:linear-gradient(135deg,#fff8e1,#ffecb3);
+    border-radius:14px;padding:8px 10px;
+    font-weight:800;font-size:15px;color:#8d6e00;
+    box-shadow:0 3px 10px rgba(0,0,0,.06);
+    border:2px solid #ffe082;
+    flex:1;text-align:center;
+    transition:.25s;
+  }
+  .pill.streak-active{
+    background:linear-gradient(135deg,#ffe0b2,#ff9800);
+    color:#5d3300;border-color:#ff6f00;
+    animation:firePulse .6s ease;
+  }
+  @keyframes firePulse{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+  .pill.bump{animation:bump .3s ease}
+  @keyframes bump{0%,100%{transform:scale(1)}50%{transform:scale(1.2);color:#e67e22}}
+
+  .progress-track{
+    width:100%;height:14px;background:#eef2f5;border-radius:20px;
+    overflow:hidden;margin-bottom:18px;position:relative;
+  }
+  .progress-fill{
+    height:100%;width:0;
+    background:linear-gradient(90deg,var(--green),var(--blue),var(--purple));
+    border-radius:20px;transition:width .5s ease;
+    box-shadow:0 0 12px rgba(46,204,113,.6);
+  }
+
+  .question-card{
+    background:linear-gradient(135deg,#f8f9ff,#eef4ff);
+    border:2px solid #e0e7ff;border-radius:20px;
+    padding:22px 16px;text-align:center;margin-bottom:16px;
+    min-height:130px;display:flex;flex-direction:column;
+    justify-content:center;align-items:center;
+    animation:slideIn .4s ease;
+  }
+  @keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+  .q-emoji{font-size:52px;line-height:1;margin-bottom:12px}
+  .q-text{
+    font-size:clamp(19px,5.5vw,22px);font-weight:700;
+    line-height:1.35;color:var(--text);
+  }
+  .options{display:flex;flex-direction:column;gap:12px}
+  .option-btn{
+    width:100%;min-height:66px;
+    border:3px solid #e5e9f0;background:#fff;border-radius:18px;
+    font-size:19px;font-weight:700;padding:14px 18px;
+    cursor:pointer;transition:.2s;color:var(--text);
+    font-family:inherit;
+    display:flex;align-items:center;gap:12px;text-align:left;
+  }
+  .option-btn .opt-icon{
+    font-size:26px;line-height:1;flex-shrink:0;
+    width:38px;height:38px;display:flex;align-items:center;justify-content:center;
+    background:#f3f6fa;border-radius:10px;
+  }
+  .option-btn .opt-text{flex:1}
+  .option-btn:active{transform:scale(.98);background:#f8fafc}
+  .option-btn.correct{
+    background:#d4f7dd;border-color:var(--green);color:var(--green-dark);
+    animation:pulseOk .45s;
+    box-shadow:0 0 0 4px rgba(46,204,113,.2);
+  }
+  .option-btn.correct .opt-icon{background:#b8ebc7}
+  .option-btn.wrong{
+    background:#fde2df;border-color:var(--red);color:var(--red);
+    animation:shake .4s;opacity:.75;
+  }
+  .option-btn.wrong .opt-icon{background:#f8c9c4}
+  @keyframes pulseOk{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .option-btn:disabled{cursor:default}
+
+  .feedback{
+    margin-top:14px;padding:14px 16px;border-radius:16px;
+    font-size:17px;font-weight:700;line-height:1.4;
+    display:none;animation:fade .3s ease;
+  }
+  .feedback.show{display:block}
+  .feedback.ok{background:#d4f7dd;color:#1e6b3a;border:2px solid #a7e8ba}
+  .feedback.bad{background:#fff4e0;color:#b06000;border:2px solid #ffd89b}
+  .feedback.hint{background:#e8f1ff;color:#1e4d8b;border:2px solid #b8d4ff}
+
+  .hint-btn{
+    width:100%;min-height:56px;margin-top:14px;
+    border:3px dashed var(--gold);background:#fffbe6;color:#a06800;
+    border-radius:16px;font-size:18px;font-weight:800;
+    cursor:pointer;font-family:inherit;transition:.2s;
+  }
+  .hint-btn:active{transform:scale(.98);background:#fff3c4}
+
+  /* ===== STARS per question ===== */
+  .stars-row{
+    display:flex;justify-content:center;gap:6px;
+    margin-bottom:14px;height:32px;
+  }
+  .star-icon{
+    font-size:26px;line-height:1;
+    filter:grayscale(1);opacity:.35;
+    transition:.4s ease;transform:scale(.85);
+  }
+  .star-icon.on{
+    filter:none;opacity:1;transform:scale(1.15);
+    animation:starPop .5s ease;
+  }
+  @keyframes starPop{0%{transform:scale(.4) rotate(-30deg)}70%{transform:scale(1.3) rotate(10deg)}100%{transform:scale(1.15) rotate(0)}}
+
+  /* ===== END ===== */
+  .end-hero{text-align:center;padding:10px 0 20px}
+  .medal{font-size:96px;line-height:1;display:block;margin-bottom:10px;animation:pop 1.6s infinite}
+  .end-hero h2{font-size:26px;color:var(--text);margin-bottom:6px;font-weight:800}
+  .end-name{font-size:18px;color:var(--muted);font-weight:700}
+  .stats{display:flex;gap:10px;margin:16px 0;flex-wrap:wrap}
+  .stat{
+    flex:1;min-width:90px;
+    background:linear-gradient(135deg,#f8f9ff,#eef4ff);
+    border:2px solid #e0e7ff;border-radius:16px;
+    padding:14px 8px;text-align:center;
+  }
+  .stat b{display:block;font-size:24px;color:var(--blue);margin-bottom:4px}
+  .stat span{font-size:12px;color:var(--muted);font-weight:700}
+  .descriptor{
+    background:#f0fff4;border:2px solid #a7e8ba;color:#1e6b3a;
+    padding:16px;border-radius:16px;font-size:17px;font-weight:700;
+    line-height:1.45;text-align:center;margin:12px 0 4px;
+  }
+  .badges{
+    display:flex;justify-content:center;gap:10px;
+    flex-wrap:wrap;margin:12px 0;
+  }
+  .badge{
+    background:linear-gradient(135deg,#fff3c4,#ffe082);
+    border:2px solid var(--gold);border-radius:14px;
+    padding:8px 12px;font-size:14px;font-weight:800;
+    color:#8d6e00;animation:pop 2s infinite;
+  }
+
+  /* ===== CONFETTI ===== */
+  .confetti{
+    position:fixed;top:-20px;width:10px;height:14px;
+    z-index:9999;pointer-events:none;
+    animation:fall linear forwards;
+  }
+  @keyframes fall{
+    0%{transform:translateY(0) rotate(0);opacity:1}
+    100%{transform:translateY(105vh) rotate(720deg);opacity:0}
+  }
+
+  /* ===== FLOATING PRAISE ===== */
+  .float-praise{
+    position:fixed;left:50%;top:40%;
+    transform:translate(-50%,-50%);
+    font-size:44px;font-weight:900;
+    color:#27ae60;z-index:9998;pointer-events:none;
+    text-shadow:2px 2px 0 #fff,4px 4px 12px rgba(0,0,0,.2);
+    animation:floatUp 1.2s ease forwards;
+  }
+  @keyframes floatUp{
+    0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}
+    30%{opacity:1;transform:translate(-50%,-50%) scale(1.2)}
+    100%{opacity:0;transform:translate(-50%,-140%) scale(1)}
+  }
+
+  /* ===== SOUND BTN ===== */
+  .sound-btn{
+    position:absolute;top:10px;right:12px;
+    background:#fff;border:2px solid #e5e9f0;border-radius:50%;
+    width:40px;height:40px;font-size:18px;cursor:pointer;
+    z-index:10;transition:.2s;
+  }
+  .sound-btn:active{transform:scale(.9)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <button class="sound-btn" id="soundBtn" title="Звук вкл/выкл">🔊</button>
+
+  <!-- ЭКРАН 1 -->
+  <section class="screen active" id="screenStart">
+    <div class="hero">
+      <div class="hero-emoji">🎓</div>
+      <h1>Добро пожаловать на урок!</h1>
+      <div class="subtitle">📘 Тема: «Идея для проекта»</div>
+    </div>
+    <label class="field-label" for="nameInput">✏️ Как тебя зовут?</label>
+    <input id="nameInput" class="name-input" type="text" placeholder="" autocomplete="off" spellcheck="false">
+    <button id="startBtn" class="btn" disabled>▶️ Начать игру</button>
+    <p class="hint-text">🪙 10 кредитов • ⭐ 30 звёзд • 10 заданий</p>
+  </section>
+
+  <!-- ЭКРАН 2 -->
+  <section class="screen" id="screenGame">
+    <div class="topbar">
+      <div class="pill" id="pillCredits">🪙 <span id="credits">10</span></div>
+      <div class="pill" id="pillStreak">🔥 x<span id="streak">0</span></div>
+      <div class="pill">📊 <span id="progress">1/10</span></div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+    <div class="stars-row" id="starsRow">
+      <span class="star-icon">⭐</span>
+      <span class="star-icon">⭐</span>
+      <span class="star-icon">⭐</span>
+    </div>
+
+    <div class="question-card">
+      <div class="q-emoji" id="qEmoji">⌨️</div>
+      <div class="q-text" id="qText">Загрузка...</div>
+    </div>
+
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback"></div>
+
+    <button id="hintBtn" class="hint-btn">💡 Подсказка</button>
+    <button id="nextBtn" class="btn" style="display:none">➡️ Дальше</button>
+  </section>
+
+  <!-- ЭКРАН 3 -->
+  <section class="screen" id="screenEnd">
+    <div class="end-hero">
+      <div class="medal" id="medalEmoji">🥇</div>
+      <h2 id="endTitle">Молодец!</h2>
+      <p class="end-name" id="endName"></p>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="endCredits">20</b><span>🪙 кредитов</span></div>
+      <div class="stat"><b id="endCorrect">10</b><span>✅ верных</span></div>
+      <div class="stat"><b id="endStars">30</b><span>⭐ звёзд</span></div>
+    </div>
+    <div class="badges" id="badgesBox"></div>
+    <p class="descriptor" id="endDescriptor"></p>
+    <button id="restartBtn" class="btn">🔄 Пройти снова</button>
+  </section>
+
+</div>
+
+<script>
+/* ============ ЗАДАНИЯ ============ */
+/* icon — эмодзи-иконка кнопки. text — подпись с русским названием в скобках. */
+const QUESTIONS = [
+  {
+    emoji: '⌨️',
+    q: 'Какая клавиша делает отступ между словами?',
+    options: [
+      { text: 'Пробел (Спейс)', icon: '⌨️' },
+      { text: 'Enter (Энтер)',   icon: '↵' }
+    ],
+    correct: 'Пробел (Спейс)',
+    hint: 'Пробел — самая длинная клавиша внизу. Она разделяет слова.'
+  },
+  {
+    emoji: '💡',
+    q: 'Что такое идея проекта?',
+    options: [
+      { text: 'Интересная мысль', icon: '💡' },
+      { text: 'Сложная задача',   icon: '🧩' }
+    ],
+    correct: 'Интересная мысль',
+    hint: 'Идея проекта — это интересная мысль, которую хочется воплотить.'
+  },
+  {
+    emoji: '⌫',
+    q: 'Какая клавиша удаляет опечатку?',
+    options: [
+      { text: 'Backspace (Бэкспейс)', icon: '⌫' },
+      { text: 'Shift (Шифт)',         icon: '⬆️' }
+    ],
+    correct: 'Backspace (Бэкспейс)',
+    hint: 'Backspace стирает букву слева от курсора. Он как ластик!'
+  },
+  {
+    emoji: '⬆️',
+    q: 'Чтобы написать одну заглавную букву, мы зажимаем...',
+    options: [
+      { text: 'Shift (Шифт)',    icon: '⬆️' },
+      { text: 'Пробел (Спейс)',  icon: '⌨️' }
+    ],
+    correct: 'Shift (Шифт)',
+    hint: 'Зажми Shift и нажми букву — получится ЗАГЛАВНАЯ!'
+  },
+  {
+    emoji: '↵',
+    q: 'Какая клавиша переносит текст на новую строчку?',
+    options: [
+      { text: 'Enter (Энтер)',        icon: '↵' },
+      { text: 'Backspace (Бэкспейс)', icon: '⌫' }
+    ],
+    correct: 'Enter (Энтер)',
+    hint: 'Enter переносит текст на новую строчку.'
+  },
+  {
+    emoji: '🎯',
+    q: 'Верно ли, что у проекта должна быть цель?',
+    options: [
+      { text: 'Верно',   icon: '✅' },
+      { text: 'Неверно', icon: '❌' }
+    ],
+    correct: 'Верно',
+    hint: 'Цель — это зачем мы делаем проект. Без цели проект не получится!'
+  },
+  {
+    emoji: '🚀',
+    q: 'Что мы делаем в начале работы над проектом?',
+    options: [
+      { text: 'Придумываем идею', icon: '💭' },
+      { text: 'Сдаём работу',     icon: '📤' }
+    ],
+    correct: 'Придумываем идею',
+    hint: 'Сначала придумываем идею — это самое интересное!'
+  },
+  {
+    emoji: '🔠',
+    q: 'Если включить Caps Lock, все буквы будут...',
+    options: [
+      { text: 'Заглавными (БОЛЬШИМИ)', icon: '🔠' },
+      { text: 'Маленькими',             icon: '🔡' }
+    ],
+    correct: 'Заглавными (БОЛЬШИМИ)',
+    hint: 'Caps Lock печатает все буквы БОЛЬШИМИ.'
+  },
+  {
+    emoji: '🔗',
+    q: 'Что к чему подходит?',
+    options: [
+      { text: 'Идея → Первая мысль',    icon: '💡' },
+      { text: 'Идея → Готовый проект',  icon: '📦' }
+    ],
+    correct: 'Идея → Первая мысль',
+    hint: 'Идея — это первая мысль. А готовый проект — это уже результат!'
+  },
+  {
+    emoji: '✏️',
+    q: 'Как исправить ошибку в слове?',
+    options: [
+      { text: 'Нажать Backspace (Бэкспейс)', icon: '⌫' },
+      { text: 'Выключить компьютер',         icon: '🔌' }
+    ],
+    correct: 'Нажать Backspace (Бэкспейс)',
+    hint: 'Backspace удаляет ошибочную букву — и можно писать снова!'
+  }
+];
+
+const PRAISE = ['Молодец!', 'Супер!', 'Отлично!', 'Здорово!', 'Верно!', 'Умница!', 'Так держать!', 'Класс!'];
+
+/* ============ СОСТОЯНИЕ ============ */
+const state = {
+  name: '',
+  credits: 10,
+  stars: 0,
+  streak: 0,
+  bestStreak: 0,
+  current: 0,
+  correct: 0,
+  attempts: 0,      // попытки на текущий вопрос
+  answered: false,
+  soundOn: true
+};
+
+const $ = id => document.getElementById(id);
+
+/* ============ ЗВУК (Web Audio API) ============ */
+let audioCtx = null;
+function ensureCtx() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+  }
+}
+function beep(freqs, dur = 0.25, type = 'sine') {
+  if (!state.soundOn) return;
+  ensureCtx();
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  freqs.forEach((f, i) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.type = type;
+    osc.frequency.value = f;
+    const t = now + i * 0.09;
+    gain.gain.setValueAtTime(0.14, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    osc.start(t); osc.stop(t + dur);
+  });
+}
+const sfxOk     = () => beep([660, 880], 0.22, 'sine');
+const sfxBad    = () => beep([220, 165], 0.28, 'triangle');
+const sfxStar   = () => beep([880, 1320], 0.18, 'sine');
+const sfxWin    = () => beep([523, 659, 784, 1046], 0.35, 'sine');
+
+/* ============ ПЕРЕМЕШИВАНИЕ ============ */
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* ============ ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ ============ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ============ СТАРТ ============ */
+$('nameInput').addEventListener('input', e => {
+  $('startBtn').disabled = e.target.value.trim().length === 0;
+});
+
+$('startBtn').addEventListener('click', () => {
+  ensureCtx();
+  state.name = $('nameInput').value.trim();
+  state.credits = 10;
+  state.stars = 0;
+  state.streak = 0;
+  state.bestStreak = 0;
+  state.current = 0;
+  state.correct = 0;
+  updateHUD();
+  showScreen('screenGame');
+  renderQuestion();
+});
+
+$('restartBtn').addEventListener('click', () => {
+  showScreen('screenStart');
+  $('nameInput').value = state.name;
+  $('startBtn').disabled = state.name.length === 0;
+});
+
+/* ============ HUD ============ */
+function updateHUD() {
+  $('credits').textContent = state.credits;
+  $('streak').textContent = state.streak;
+  $('progress').textContent = (state.current + 1) + '/' + QUESTIONS.length;
+  $('progressFill').style.width = (state.current / QUESTIONS.length * 100) + '%';
+
+  const pill = $('pillStreak');
+  if (state.streak >= 2) pill.classList.add('streak-active');
+  else pill.classList.remove('streak-active');
+}
+
+function bump(el) {
+  el.classList.remove('bump');
+  void el.offsetWidth;
+  el.classList.add('bump');
+}
+
+/* ============ ОТРИСОВКА ВОПРОСА ============ */
+function renderQuestion() {
+  if (state.current >= QUESTIONS.length) return endGame();
+
+  const q = QUESTIONS[state.current];
+  state.answered = false;
+  state.attempts = 0;
+
+  updateHUD();
+  resetStars();
+
+  $('qEmoji').textContent = q.emoji;
+  $('qText').textContent = q.q;
+
+  const optionsBox = $('options');
+  optionsBox.innerHTML = '';
+  const shuffled = shuffle(q.options);
+
+  shuffled.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.type = 'button';
+    btn.innerHTML = '<span class="opt-icon">' + opt.icon + '</span><span class="opt-text">' + opt.text + '</span>';
+    btn.addEventListener('click', () => handleAnswer(btn, opt.text));
+    optionsBox.appendChild(btn);
+  });
+
+  const fb = $('feedback');
+  fb.className = 'feedback';
+  fb.textContent = '';
+  $('hintBtn').style.display = 'block';
+  $('nextBtn').style.display = 'none';
+}
+
+/* ============ ЗВЁЗДЫ ТЕКУЩЕГО ВОПРОСА ============ */
+function resetStars() {
+  document.querySelectorAll('.star-icon').forEach(s => s.classList.remove('on'));
+}
+function setStars(n) {
+  const stars = document.querySelectorAll('.star-icon');
+  stars.forEach((s, i) => {
+    if (i < n) s.classList.add('on');
+  });
+}
+
+/* ============ ОТВЕТ ============ */
+function handleAnswer(btn, optText) {
+  if (state.answered) return;
+  const q = QUESTIONS[state.current];
+  const fb = $('feedback');
+  state.attempts += 1;
+
+  if (optText === q.correct) {
+    /* --- ВЕРНО --- */
+    state.answered = true;
+    btn.classList.add('correct');
+    state.credits += 1;
+    state.correct += 1;
+    state.streak += 1;
+    if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+
+    // Звёзды: 3 — с 1-й попытки, 2 — со 2-й, 1 — с 3-й+
+    let earned = state.attempts === 1 ? 3 : (state.attempts === 2 ? 2 : 1);
+    state.stars += earned;
+    setStars(earned);
+
+    // Звук и похвала
+    sfxOk();
+    setTimeout(sfxStar, 180);
+
+    const praise = PRAISE[Math.floor(Math.random() * PRAISE.length)];
+    fb.className = 'feedback ok show';
+    fb.textContent = '✅ ' + praise + ' ' + q.hint;
+
+    showFloatingPraise(praise);
+    if (state.streak >= 3) {
+      setTimeout(() => showFloatingPraise('🔥 Серия x' + state.streak + '!'), 350);
+    }
+    if (earned === 3) fireConfetti(30);
+
+    document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+    $('hintBtn').style.display = 'none';
+
+    updateHUD();
+    bump($('pillCredits'));
+
+    const next = $('nextBtn');
+    next.style.display = 'block';
+    next.textContent = (state.current === QUESTIONS.length - 1)
+      ? '🏁 Завершить'
+      : '➡️ Дальше';
+  } else {
+    /* --- НЕВЕРНО: идти дальше НЕЛЬЗЯ, даём вторую попытку --- */
+    btn.classList.add('wrong');
+    btn.disabled = true;
+    state.streak = 0;
+    sfxBad();
+
+    fb.className = 'feedback bad show';
+    fb.textContent = '🤔 Попробуй ещё раз! 💡 ' + q.hint;
+
+    updateHUD();
+    // Показываем снижение звёзд визуально: сбрасываем и не подсвечиваем
+    resetStars();
+    if (state.attempts === 1) setStars(2);
+    else if (state.attempts === 2) setStars(1);
+    // Если attempts >= 3 — звёзды не подсвечены (0)
+  }
+}
+
+/* ============ ПОДСКАЗКА ============ */
+$('hintBtn').addEventListener('click', () => {
+  if (state.answered) return;
+  const q = QUESTIONS[state.current];
+  const fb = $('feedback');
+  fb.className = 'feedback hint show';
+  fb.textContent = '💡 ' + q.hint;
+});
+
+/* ============ КНОПКА ДАЛЬШЕ ============ */
+$('nextBtn').addEventListener('click', () => {
+  state.current += 1;
+  renderQuestion();
+});
+
+/* ============ ЭФФЕКТЫ ============ */
+function showFloatingPraise(text) {
+  const el = document.createElement('div');
+  el.className = 'float-praise';
+  el.textContent = text;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1200);
+}
+
+function fireConfetti(count) {
+  const colors = ['#f39c12', '#e74c3c', '#2ecc71', '#3498db', '#9b59b6', '#f1c40f', '#e67e22'];
+  for (let i = 0; i < count; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.animationDuration = (1.5 + Math.random() * 1.5) + 's';
+    c.style.animationDelay = (Math.random() * 0.3) + 's';
+    c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    c.style.width = (6 + Math.random() * 8) + 'px';
+    c.style.height = (8 + Math.random() * 10) + 'px';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 3200);
+  }
+}
+
+/* ============ ФИНАЛ ============ */
+function endGame() {
+  showScreen('screenEnd');
+  sfxWin();
+  setTimeout(() => fireConfetti(120), 200);
+
+  $('endName').textContent = state.name + ', ты прошёл тренажёр! 🎉';
+  $('endCredits').textContent = state.credits;
+  $('endCorrect').textContent = state.correct;
+  $('endStars').textContent = state.stars + '/' + (QUESTIONS.length * 3);
+
+  let medal, title, desc;
+  if (state.correct === 10) {
+    medal = '🥇'; title = 'Золотая медаль!';
+    desc = 'Ты настоящий мастер клавиатуры! Все 10 заданий решены верно. Идею проекта ты понял отлично!';
+  } else if (state.correct >= 7) {
+    medal = '🥈'; title = 'Серебряная медаль!';
+    desc = 'Отличный результат! Ты хорошо знаешь клавиши и идею проекта. Ещё немного практики — и будет золото!';
+  } else if (state.correct >= 5) {
+    medal = '🥉'; title = 'Бронзовая медаль!';
+    desc = 'Хорошая работа! Попробуй пройти тренажёр ещё раз — получится ещё лучше!';
+  } else {
+    medal = '📘'; title = 'Хорошее начало!';
+    desc = 'Ты старался — это главное! Пройди тренажёр ещё раз, и результат обязательно вырастет!';
+  }
+  $('medalEmoji').textContent = medal;
+  $('endTitle').textContent = title;
+  $('endDescriptor').textContent = desc;
+
+  // Бейджи
+  const badges = [];
+  if (state.correct === 10) badges.push('🏆 Идеальный результат');
+  if (state.bestStreak >= 5) badges.push('🔥 Серия x' + state.bestStreak);
+  if (state.stars >= 28) badges.push('⭐ Звёздный ученик');
+  if (state.credits >= 20) badges.push('🪙 Богач');
+  const box = $('badgesBox');
+  box.innerHTML = '';
+  badges.forEach(b => {
+    const d = document.createElement('div');
+    d.className = 'badge';
+    d.textContent = b;
+    box.appendChild(d);
+  });
+}
+
+/* ============ ЗВУК ВКЛ/ВЫКЛ ============ */
+$('soundBtn').addEventListener('click', () => {
+  state.soundOn = !state.soundOn;
+  $('soundBtn').textContent = state.soundOn ? '🔊' : '🔇';
+});
+</script>
+</body>
+</html>
